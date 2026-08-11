@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflared
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: cloudflared
+
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+        azure.workload.identity/use: "true"
+
+    spec:
+      serviceAccountName: cloudflared
+
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.5.2
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --loglevel
+            - info
+            - --metrics
+            - 0.0.0.0:2000
+            - run
+
+          env:
+            - name: TUNNEL_TOKEN_FILE
+              value: /mnt/secrets-store/cloudflare-tunnel-token
+
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 1
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: cloudflared-keyvault
