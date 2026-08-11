@@ -7,38 +7,30 @@ spec:
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
-
   generators:
     - git:
         repoURL: https://github.com/AaronShemtov/wiki-gitops.git
         revision: main
         directories:
           - path: apps/*
-
   template:
     metadata:
       name: "{{.path.basename}}"
-
     spec:
-      project: default
-
+      project: apps
       source:
         repoURL: https://github.com/AaronShemtov/wiki-gitops.git
         targetRevision: main
         path: "{{.path.path}}"
-
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.path.basename}}"
-
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-
         syncOptions:
           - CreateNamespace=true
-
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -49,34 +41,27 @@ spec:
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
-
   generators:
     - git:
         repoURL: https://github.com/AaronShemtov/wiki-gitops.git
         revision: main
         directories:
           - path: infrastructure/*
-
   template:
     metadata:
       name: "{{.path.basename}}"
-
     spec:
-      project: default
-
+      project: infrastructure
       source:
         repoURL: https://github.com/AaronShemtov/wiki-gitops.git
         targetRevision: main
         path: "{{.path.path}}"
-
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.path.basename}}"
-
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-
         syncOptions:
           - CreateNamespace=true

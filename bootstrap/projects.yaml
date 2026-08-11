@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  description: Application workloads managed by Argo CD
+  sourceRepos:
+    - https://github.com/AaronShemtov/wiki-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: wikijs
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  description: Platform components managed by Argo CD
+  sourceRepos:
+    - https://github.com/AaronShemtov/wiki-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: cloudflared
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace

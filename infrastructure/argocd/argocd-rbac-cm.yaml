@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  policy.default: role:reviewer
+  policy.csv: |
+    p, role:reviewer, applications, get, */*, allow
+    p, role:reviewer, applicationsets, get, */*, allow
+    p, role:reviewer, projects, get, *, allow
