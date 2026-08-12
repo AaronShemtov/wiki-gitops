@@ -3,14 +3,12 @@ kind: Service
 metadata:
   name: wikijs
   namespace: wikijs
-
 spec:
   type: ClusterIP
-
   selector:
     app: wikijs
-
   ports:
     - name: http
       port: 3000
       targetPort: 3000
+      protocol: TCP

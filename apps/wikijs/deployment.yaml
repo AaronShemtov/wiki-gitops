@@ -6,31 +6,27 @@ metadata:
 spec:
   replicas: 2
   revisionHistoryLimit: 3
-
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
-
   selector:
     matchLabels:
       app: wikijs
-
   template:
     metadata:
       labels:
         app: wikijs
         azure.workload.identity/use: "true"
-
     spec:
       serviceAccountName: wikijs
-
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -38,78 +34,63 @@ spec:
           labelSelector:
             matchLabels:
               app: wikijs
-
       containers:
         - name: wikijs
           image: ghcr.io/requarks/wiki:2.5.314
-
           securityContext:
             privileged: false
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-
           ports:
             - containerPort: 3000
               name: http
-
           env:
             - name: DB_TYPE
               value: postgres
-
             - name: DB_PORT
               value: "5432"
-
             - name: DB_SSL
               value: "true"
-
             - name: HA_ACTIVE
               value: "true"
-
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   name: wikijs-db
                   key: DB_HOST
-
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
                   name: wikijs-db
                   key: DB_USER
-
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
                   name: wikijs-db
                   key: DB_PASS
-
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
                   name: wikijs-db
                   key: DB_NAME
-
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets-store
               readOnly: true
-
           readinessProbe:
             httpGet:
               path: /healthz
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 10
-
           livenessProbe:
             httpGet:
               path: /healthz
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 20
-
           resources:
             requests:
               cpu: 100m
@@ -117,7 +98,6 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
-
       volumes:
         - name: secrets-store
           csi:
