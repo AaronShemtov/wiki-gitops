@@ -10,7 +10,7 @@ spec:
     name: wikijs
 
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 25
 
   metrics:
     - type: Resource
